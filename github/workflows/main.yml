@@ -1,0 +1,28 @@
+name: Gemini Auto-Update
+on:
+  push:
+    paths:
+      - 'instructions.txt'
+
+jobs:
+  ai-update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install AI Library
+        run: pip install google-generativeai
+      - name: Fetch Gemini Code
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python update_site.py
+      - name: Save and Push to GitHub
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "Gemini-AI-Bot"
+          git add .
+          git commit -m "Gemini: Automatic site update"
+          git push
