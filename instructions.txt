@@ -1,15 +1,1 @@
-Act as an expert React developer. 
-Target: Rewrite 'src/pages/LandingPage.tsx'
-Product: Little Genius Spark (15,000+ Math activities for kids)
-Style: Modern, vibrant, professional startup landing page.
-Tools: Tailwind CSS ONLY.
-Language: Professional English.
-
-Requirements:
-1. Hero Section: High-converting headline and CTA button "Get Access Now".
-2. Features Section: Grid showing "15k+ Activities", "Printable PDFs", "Interactive Learning".
-3. Trust Section: "Trusted by 5000+ Parents".
-4. Design: Use soft blue and bright yellow accents.
-5. Technical: Fully responsive for mobile and desktop.
-
-Constraint: Return ONLY the code for LandingPage.tsx. No markdown backticks, no talk.
+Make a professional blue theme for Little Genius Spark"
