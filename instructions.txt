@@ -1,0 +1,31 @@
+import os
+import google.generativeai as genai
+
+# 1. إعداد الاتصال بـ Gemini
+genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+model = genai.GenerativeModel('gemini-1.5-flash') # نسخة سريعة وذكية
+
+# 2. قراءة طلبك من ملف التعليمات
+with open("instructions.txt", "r", encoding="utf-8") as f:
+    user_instructions = f.read()
+
+# 3. صياغة الطلب التقني لـ Gemini
+prompt = f"""
+You are an expert React & Tailwind CSS developer. 
+Task: Update the file 'src/pages/LandingPage.tsx' based on these instructions: {user_instructions}
+Rules:
+- Return ONLY the complete source code.
+- Use Tailwind CSS for all styling.
+- Ensure the language is English.
+- Do not include markdown code blocks like ```tsx.
+"""
+
+# 4. طلب الكود من الذكاء الاصطناعي
+response = model.generate_content(prompt)
+new_code = response.text
+
+# 5. تحديث ملف الموقع بالكود الجديد
+with open("src/pages/LandingPage.tsx", "w", encoding="utf-8") as f:
+    f.write(new_code)
+
+print("✅ Gemini has successfully updated the landing page!")
