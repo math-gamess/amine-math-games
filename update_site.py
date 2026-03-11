@@ -2,30 +2,29 @@ import os
 import google.generativeai as genai
 import re
 
-# إعداد Gemini
+# ربط Gemini
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 model = genai.GenerativeModel('gemini-1.5-flash')
 
-# قراءة تعليماتك
+# قراءة ما تريده من الموقع
 with open('instructions.txt', 'r', encoding='utf-8') as f:
     instructions = f.read()
 
-# طلب كود "نظيف" لا يسبب أخطاء Vercel
+# أمر "عسكري" لـ Gemini لمنع الأخطاء نهائياً
 prompt = f"""
-Rewrite the React component 'src/pages/LandingPage.tsx' based on: {instructions}.
-CRITICAL RULES:
-1. DO NOT import local files (No '../utils/tracking', No '../components/Logo').
-2. Use ONLY Tailwind CSS.
-3. Add this Google Analytics tag: G-XXXXXXXXXX.
-4. Return ONLY the code, no text before or after.
+Build a High-Converting React Landing Page for 'Little Genius Spark' based on: {instructions}.
+CRITICAL INSTRUCTIONS:
+1. ONLY use standard HTML tags and Tailwind CSS classes.
+2. DO NOT use ANY imports except 'react'. (No lucide, No framer-motion, No local files).
+3. For icons, use Emojis ONLY (e.g., 🚀, ✅).
+4. Include Google Analytics (G-XXXXXXXXXX) code inside a script tag at the top.
+5. Provide ONLY the code for LandingPage.tsx.
 """
 
 response = model.generate_content(prompt)
-content = response.text
+# تنظيف الكود من أي زوائد
+clean_code = re.sub(r'```[a-z]*\n?', '', response.text).replace('```', '')
 
-# تنظيف الكود من أي علامات Markdown
-clean_code = re.sub(r'```[a-z]*\n?', '', content).replace('```', '')
-
-# كتابة الملف أوتوماتيكياً
+# كتابة الكود وإصلاح الموقع فوراً
 with open('src/pages/LandingPage.tsx', 'w', encoding='utf-8') as f:
     f.write(clean_code)
