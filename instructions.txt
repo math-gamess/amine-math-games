@@ -1,31 +1,15 @@
-import os
-import google.generativeai as genai
+Act as an expert React developer. 
+Target: Rewrite 'src/pages/LandingPage.tsx'
+Product: Little Genius Spark (15,000+ Math activities for kids)
+Style: Modern, vibrant, professional startup landing page.
+Tools: Tailwind CSS ONLY.
+Language: Professional English.
 
-# 1. إعداد الاتصال بـ Gemini
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-model = genai.GenerativeModel('gemini-1.5-flash') # نسخة سريعة وذكية
+Requirements:
+1. Hero Section: High-converting headline and CTA button "Get Access Now".
+2. Features Section: Grid showing "15k+ Activities", "Printable PDFs", "Interactive Learning".
+3. Trust Section: "Trusted by 5000+ Parents".
+4. Design: Use soft blue and bright yellow accents.
+5. Technical: Fully responsive for mobile and desktop.
 
-# 2. قراءة طلبك من ملف التعليمات
-with open("instructions.txt", "r", encoding="utf-8") as f:
-    user_instructions = f.read()
-
-# 3. صياغة الطلب التقني لـ Gemini
-prompt = f"""
-You are an expert React & Tailwind CSS developer. 
-Task: Update the file 'src/pages/LandingPage.tsx' based on these instructions: {user_instructions}
-Rules:
-- Return ONLY the complete source code.
-- Use Tailwind CSS for all styling.
-- Ensure the language is English.
-- Do not include markdown code blocks like ```tsx.
-"""
-
-# 4. طلب الكود من الذكاء الاصطناعي
-response = model.generate_content(prompt)
-new_code = response.text
-
-# 5. تحديث ملف الموقع بالكود الجديد
-with open("src/pages/LandingPage.tsx", "w", encoding="utf-8") as f:
-    f.write(new_code)
-
-print("✅ Gemini has successfully updated the landing page!")
+Constraint: Return ONLY the code for LandingPage.tsx. No markdown backticks, no talk.
