@@ -75,6 +75,7 @@ const FAQItem = ({ question, answer }: { question: string, answer: string }) => 
 };
 
 import { useTheme } from '../context/ThemeContext';
+import { saveUrlParams, trackEvent } from '../utils/tracking';
 
 export default function LandingPage() {
   const { t, i18n } = useTranslation();
@@ -86,6 +87,9 @@ export default function LandingPage() {
   const langMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    saveUrlParams();
+    trackEvent('page_view');
+    
     fetch('/api/settings')
       .then(res => res.json())
       .then(data => {
@@ -228,7 +232,8 @@ export default function LandingPage() {
     { code: 'ar', label: 'العربية' },
     { code: 'fr', label: 'Français' },
     { code: 'es', label: 'Español' },
-    { code: 'de', label: 'Deutsch' }
+    { code: 'de', label: 'Deutsch' },
+    { code: 'fil', label: 'Filipino' }
   ];
 
   const testimonials = [
@@ -236,31 +241,31 @@ export default function LandingPage() {
       name: "Sarah J.",
       role: "Teacher",
       content: t('testimonial_1_content'),
-      image: "https://picsum.photos/seed/sarah/100/100"
+      image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100"
     },
     {
       name: "David M.",
       role: "Parent",
       content: t('testimonial_2_content'),
-      image: "https://picsum.photos/seed/david/100/100"
+      image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=100"
     },
     {
       name: "Elena R.",
       role: "Entrepreneur",
       content: t('testimonial_3_content'),
-      image: "https://picsum.photos/seed/elena/100/100"
+      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100"
     },
     {
       name: "Ahmed K.",
       role: "Educator",
       content: t('testimonial_4_content'),
-      image: "https://picsum.photos/seed/ahmed/100/100"
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100"
     },
     {
       name: "Jessica L.",
       role: "Mom",
       content: t('testimonial_5_content'),
-      image: "https://picsum.photos/seed/jessica/100/100"
+      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=100"
     }
   ];
 
@@ -317,7 +322,7 @@ export default function LandingPage() {
             </div>
 
             <button 
-              onClick={() => navigate('/checkout')}
+              onClick={() => { trackEvent('begin_checkout'); navigate('/checkout'); }}
               className="bg-indigo-600 text-white px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
             >
               {t('get_access')}
@@ -340,14 +345,14 @@ export default function LandingPage() {
                 <span>{t('five_star_rated')}</span>
               </div>
               <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-[var(--text-main)] mb-6 leading-[1.1]">
-                {t('hero_title', { count: 15000 })}
+                {t('hero_title', { count: 12000 })}
               </h1>
               <p className="text-xl text-[var(--text-muted)] mb-10 leading-relaxed">
                 {t('hero_subtitle')}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button 
-                  onClick={() => navigate('/checkout')}
+                  onClick={() => { trackEvent('begin_checkout'); navigate('/checkout'); }}
                   className="bg-indigo-600 text-white px-8 py-4 rounded-2xl text-lg font-bold hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200 flex items-center justify-center gap-2"
                 >
                   <Download className="w-5 h-5" />
@@ -355,8 +360,13 @@ export default function LandingPage() {
                 </button>
                 <div className="flex items-center justify-center gap-4 px-6 py-4">
                   <div className="flex -space-x-2">
-                    {[1, 2, 3, 4].map(i => (
-                      <img key={i} src={`https://picsum.photos/seed/user${i}/100/100`} alt="User" className="w-8 h-8 rounded-full border-2 border-[var(--bg-card)]" referrerPolicy="no-referrer" />
+                    {[
+                      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100",
+                      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=100",
+                      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100",
+                      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100"
+                    ].map((src, i) => (
+                      <img key={i} src={src} alt="User" className="w-8 h-8 rounded-full border-2 border-[var(--bg-card)] object-cover" referrerPolicy="no-referrer" />
                     ))}
                   </div>
                   <span className="text-sm font-medium text-[var(--text-muted)]">{t('joined_by')}</span>
@@ -368,6 +378,40 @@ export default function LandingPage() {
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 opacity-20 pointer-events-none">
             <div className="absolute top-20 left-10 w-64 h-64 bg-indigo-400 rounded-full blur-3xl" />
             <div className="absolute bottom-20 right-10 w-96 h-96 bg-emerald-400 rounded-full blur-3xl" />
+          </div>
+        </section>
+
+        {/* Product Images Section */}
+        <section className="py-12 bg-[var(--bg-main)] transition-colors">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="rounded-3xl overflow-hidden shadow-2xl border border-[var(--border-color)]"
+              >
+                <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&q=80&w=800" alt="Product Preview 1" className="w-full h-auto object-cover aspect-square" referrerPolicy="no-referrer" />
+              </motion.div>
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+                className="rounded-3xl overflow-hidden shadow-2xl border border-[var(--border-color)]"
+              >
+                <img src="https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&q=80&w=800" alt="Product Preview 2" className="w-full h-auto object-cover aspect-square" referrerPolicy="no-referrer" />
+              </motion.div>
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+                className="rounded-3xl overflow-hidden shadow-2xl border border-[var(--border-color)]"
+              >
+                <img src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=800" alt="Product Preview 3" className="w-full h-auto object-cover aspect-square" referrerPolicy="no-referrer" />
+              </motion.div>
+            </div>
           </div>
         </section>
 
@@ -503,6 +547,7 @@ export default function LandingPage() {
                   <button 
                     onClick={() => {
                       triggerPurchaseEvent();
+                      trackEvent('begin_checkout');
                       navigate('/checkout');
                     }}
                     className="w-full bg-indigo-600 text-white py-4 px-8 rounded-2xl font-bold text-xl hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
@@ -554,6 +599,7 @@ export default function LandingPage() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
             <Logo />
             <div className="flex flex-wrap justify-center gap-8 text-sm text-[var(--text-muted)]">
+              <Link to="/contact" className="hover:text-indigo-600 transition-colors">{t('contact_us', { defaultValue: 'Contact Us' })}</Link>
               <Link to="/privacy" className="hover:text-indigo-600 transition-colors">{t('privacy_policy')}</Link>
               <Link to="/terms" className="hover:text-indigo-600 transition-colors">{t('terms_service')}</Link>
               <Link to="/refund" className="hover:text-indigo-600 transition-colors">{t('refund_policy')}</Link>
