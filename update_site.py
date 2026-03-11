@@ -1,27 +1,31 @@
 import os
 import google.generativeai as genai
+import re
 
-# إعداد الاتصال بـ Gemini
+# إعداد Gemini
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 model = genai.GenerativeModel('gemini-1.5-flash')
 
-# قراءة تعليماتك من ملف instructions.txt
+# قراءة تعليماتك
 with open('instructions.txt', 'r', encoding='utf-8') as f:
     instructions = f.read()
 
-# أمر صارم للذكاء الاصطناعي لإنتاج كود احترافي "أوتوماتيكي"
+# طلب كود "نظيف" لا يسبب أخطاء Vercel
 prompt = f"""
-Write a premium React Landing Page (LandingPage.tsx) based on: {instructions}.
-CRITICAL RULES FOR AUTOMATION:
-1. NO local imports (No ../utils/tracking).
-2. Use ONLY Tailwind CSS for styling and icons (use emojis for icons).
-3. Include Google Analytics (G-XXXXXXXXXX) and Google Ads tracking scripts.
-4. Return ONLY the code, no markdown backticks.
+Rewrite the React component 'src/pages/LandingPage.tsx' based on: {instructions}.
+CRITICAL RULES:
+1. DO NOT import local files (No '../utils/tracking', No '../components/Logo').
+2. Use ONLY Tailwind CSS.
+3. Add this Google Analytics tag: G-XXXXXXXXXX.
+4. Return ONLY the code, no text before or after.
 """
 
 response = model.generate_content(prompt)
-clean_code = response.text.replace("```tsx", "").replace("```jsx", "").replace("```", "")
+content = response.text
 
-# تحديث الملف أوتوماتيكياً
+# تنظيف الكود من أي علامات Markdown
+clean_code = re.sub(r'```[a-z]*\n?', '', content).replace('```', '')
+
+# كتابة الملف أوتوماتيكياً
 with open('src/pages/LandingPage.tsx', 'w', encoding='utf-8') as f:
     f.write(clean_code)
