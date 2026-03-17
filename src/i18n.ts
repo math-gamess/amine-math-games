@@ -299,4 +299,55 @@ const resources = {
       "your_files": "Iyong mga File",
       "files": "Mga File",
       "no_files_available": "Wala pang available na file.",
-      "email_sent_title": "Suriin ang I
+      "email_sent_title": "Suriin ang Iyong Inbox",
+      "email_sent_desc": "Ipinadala namin ang mga link sa iyong email.",
+      "need_help": "Kailangan ng tulong sa iyong order?",
+      "back_to_home": "Bumalik sa Home",
+      "fill_all_fields": "Pakisagutan ang lahat ng kinakailangang field.",
+      "math_item_1": "Interactive Logic Puzzles",
+      "math_item_2": "Visual Literacy worksheets",
+      "math_item_3": "Step-by-step Math Games",
+      "math_item_4": "Kindergarten-ready curriculum",
+      "math_grid_1_title": "Number Sense",
+      "math_grid_1_desc": "Pagbilang at pagkilala sa dami.",
+      "math_grid_2_title": "Literacy",
+      "math_grid_2_desc": "Phonics at bokabularyo.",
+      "math_grid_3_title": "2026 Planner",
+      "math_grid_3_desc": "Bonus: Canva teaching template.",
+      "math_grid_4_title": "Logic Puzzles",
+      "math_grid_4_desc": "Problem-solving skills.",
+      "plr_item_1_title": "100% Profit",
+      "plr_item_1_desc": "Sayo lahat ng kita mula sa bawat benta.",
+      "plr_item_2_title": "Unrestricted PLR",
+      "plr_item_2_desc": "I-edit at i-customize ayon sa iyong brand.",
+      "plr_item_3_title": "Instant Launch",
+      "plr_item_3_desc": "I-download at simulan ang pagbebenta ngayon.",
+      "faq_q1": "Ano ang kasama sa bundle?",
+      "faq_a1": "Makakakuha ka ng higit sa 15,000 digital files kabilang ang math games at worksheets.",
+      "faq_q2": "Paano gumagana ang Resell Rights (MRR)?",
+      "faq_a2": "Maaari mong ibenta ang produkto bilang sayo at itago ang 100% ng kita.",
+      "testimonial_1_content": "Ang bundle na ito ay nakatipid sa akin ng oras!",
+      "testimonial_2_content": "Excited na ang mga bata sa math time.",
+      "testimonial_3_content": "Napakaganda ng PLR rights.",
+      "testimonial_4_content": "Maganda ang focus sa logic-building.",
+      "testimonial_5_content": "Hindi kami nauubusan ng mga aktibidad."
+    }
+  }
+};
+
+i18n
+  .use(LanguageDetector)
+  .use(initReactI18next)
+  .init({
+    resources,
+    fallbackLng: "en",
+    interpolation: {
+      escapeValue: false
+    },
+    detection: {
+      order: ['localStorage', 'navigator'],
+      caches: ['localStorage']
+    }
+  });
+
+export default i18n;
