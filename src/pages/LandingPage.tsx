@@ -10,12 +10,11 @@ import {
   Calendar, 
   TrendingUp, 
   ChevronDown, 
-  Mail,
-  Lock,
-  CreditCard,
-  Globe,
-  Sun,
-  Moon
+  Lock, 
+  CreditCard, 
+  Globe, 
+  Sun, 
+  Moon 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -26,33 +25,8 @@ import { saveUrlParams, trackEvent } from '../utils/tracking';
 
 // --- Components ---
 
-interface TestimonialProps {
-  name: string;
-  role: string;
-  content: string;
-  image: string;
-}
-
-const Testimonial: React.FC<TestimonialProps> = ({ name, role, content, image }) => (
-  <div className="bg-[var(--bg-card)] p-6 rounded-2xl shadow-sm border border-[var(--border-color)] flex flex-col h-full transition-colors">
-    <div className="flex items-center gap-4 mb-4">
-      <img src={image} alt={name} className="w-12 h-12 rounded-full object-cover border-2 border-indigo-500/20" referrerPolicy="no-referrer" />
-      <div>
-        <p className="font-bold text-[var(--text-main)]">{name}</p>
-        <p className="text-sm text-[var(--text-muted)]">{role}</p>
-      </div>
-    </div>
-    <div className="flex gap-1 mb-4">
-      {[...Array(5)].map((_, i) => (
-        <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-      ))}
-    </div>
-    <p className="text-[var(--text-muted)] italic mb-6 flex-grow leading-relaxed">"{content}"</p>
-  </div>
-);
-
 const FAQItem = ({ question, answer }: { question: string, answer: string }) => {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="border-b border-[var(--border-color)] py-4">
       <button 
@@ -96,14 +70,6 @@ export default function LandingPage() {
       .then(res => res.json())
       .then(data => {
         setSettings(data);
-        const savedLang = localStorage.getItem('i18nextLng');
-        if (!savedLang) {
-          const browserLang = navigator.language.split('-')[0];
-          const supported = ['en', 'ar', 'fr', 'es', 'de', 'fil'];
-          if (supported.includes(browserLang)) {
-            i18n.changeLanguage(browserLang);
-          }
-        }
       })
       .catch(err => {
         console.error('Failed to load settings:', err);
@@ -113,7 +79,7 @@ export default function LandingPage() {
           is_discount_active: 'true'
         });
       });
-  }, [i18n]);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -127,126 +93,118 @@ export default function LandingPage() {
 
   // --- Logic Helpers ---
 
-  const triggerPurchaseEvent = () => {
-    if (!settings) return;
-    const value = parseFloat(settings.sale_price) || 5.0;
-    const currency = 'USD';
-
+  const handleCheckoutNavigation = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    
+    // محاولة التتبع بشكل آمن جداً
     try {
       if (typeof window !== 'undefined') {
         const win = window as any;
-        // Facebook
-        if (win.fbq) win.fbq('track', 'Purchase', { value, currency });
-        // TikTok
-        if (win.ttq) win.ttq.track('CompletePayment', { value, currency });
-        // Google Ads & GA4
-        if (win.gtag) {
-          if (settings.google_ads_status === 'on' && settings.google_ads_id && settings.google_ads_label) {
-            win.gtag('event', 'conversion', {
-              'send_to': `${settings.google_ads_id}/${settings.google_ads_label}`,
-              'value': value,
-              'currency': currency
-            });
-          }
-          win.gtag('event', 'purchase', {
-            value: value,
-            currency: currency,
-            items: [{ item_id: 'bundle_1', item_name: 'Little Genius Spark Bundle' }]
-          });
-        }
+        const value = settings?.sale_price || '5';
+        if (win.fbq) win.fbq('track', 'InitiateCheckout', { value, currency: 'USD' });
+        if (win.ttq) win.ttq.track('InitiateCheckout');
       }
     } catch (err) {
-      console.error("Tracking failed:", err);
+      console.error("Tracking error:", err);
     }
-  };
 
-  const handleCheckoutNavigation = () => {
-    triggerPurchaseEvent();
     trackEvent('begin_checkout');
-    // الانتقال بعد تأخير بسيط لضمان تنفيذ التتبع
-    setTimeout(() => {
-      navigate('/checkout');
-    }, 150);
-  };
-
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
-    setIsLangMenuOpen(false);
+    
+    // الانتقال الفوري لضمان عدم التعليق
+    navigate('/checkout');
   };
 
   const isRTL = i18n.language === 'ar';
-  
-  // تصحيح حساب الخصم
-  const discountPercent = settings 
-    ? Math.round(((parseFloat(settings.original_price) - parseFloat(settings.sale_price)) / parseFloat(settings.original_price)) * 100) 
-    : 0;
-
-  // Script Injection
-  useEffect(() => {
-    if (settings) {
-      const injectCode = (code: string, id: string) => {
-        if (!code) return;
-        const existing = document.getElementById(id);
-        if (existing) existing.remove();
-        const container = document.createElement('div');
-        container.id = id;
-        container.innerHTML = code;
-        const scripts = container.querySelectorAll('script');
-        scripts.forEach(oldScript => {
-          const newScript = document.createElement('script');
-          Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-          newScript.appendChild(document.createTextNode(oldScript.innerHTML));
-          oldScript.parentNode?.replaceChild(newScript, oldScript);
-        });
-        document.head.appendChild(container);
-      };
-
-      if (settings.fb_pixel_status === 'on') injectCode(settings.fb_pixel, 'fb-pixel-container');
-      if (settings.ga_tag_status === 'on') injectCode(settings.ga_tag, 'ga-tag-container');
-      if (settings.tiktok_pixel_status === 'on') injectCode(settings.tiktok_pixel, 'tiktok-pixel-container');
-
-      if (settings.google_ads_status === 'on' && settings.google_ads_id) {
-        const adsId = settings.google_ads_id;
-        const s1 = document.createElement('script');
-        s1.async = true; s1.src = `https://www.googletagmanager.com/gtag/js?id=${adsId}`;
-        const s2 = document.createElement('script');
-        s2.innerHTML = `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${adsId}');`;
-        document.head.appendChild(s1); document.head.appendChild(s2);
-      }
-    }
-  }, [settings]);
+  const discountPercent = settings ? Math.round(((parseFloat(settings.original_price) - parseFloat(settings.sale_price)) / parseFloat(settings.original_price)) * 100) : 0;
 
   if (!settings) return null;
 
-  const languages = [
-    { code: 'en', label: 'English' },
-    { code: 'ar', label: 'العربية' },
-    { code: 'fr', label: 'Français' },
-    { code: 'es', label: 'Español' },
-    { code: 'de', label: 'Deutsch' },
-    { code: 'fil', label: 'Filipino' }
-  ];
-
-  const testimonials = [
-    { name: "Sarah J.", role: "Teacher", content: t('testimonial_1_content'), image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" },
-    { name: "David M.", role: "Parent", content: t('testimonial_2_content'), image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100" },
-    { name: "Elena R.", role: "Entrepreneur", content: t('testimonial_3_content'), image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" },
-    { name: "Ahmed K.", role: "Educator", content: t('testimonial_4_content'), image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" },
-    { name: "Jessica L.", role: "Mom", content: t('testimonial_5_content'), image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100" }
-  ];
-
   return (
-    <div className={`min-h-screen bg-[var(--bg-main)] font-sans text-[var(--text-main)] transition-colors ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Header */}
+    <div className={`min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] transition-colors ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      {/* Navigation */}
       <header className="sticky top-0 z-50 bg-[var(--bg-card)]/80 backdrop-blur-md border-b border-[var(--border-color)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <Logo />
-          <nav className="hidden lg:flex gap-8 text-sm font-medium text-[var(--text-muted)]">
-            <a href="#features" className="hover:text-indigo-600">{t('features')}</a>
-            <a href="#math" className="hover:text-indigo-600">{t('math_focus')}</a>
-            <a href="#plr" className="hover:text-indigo-600">{t('resell_rights')}</a>
-            <a href="#faq" className="hover:text-indigo-600">{t('faq')}</a>
-            <Link to="/login" className="hover:text-indigo-600">{t('admin')}</Link>
-          </nav>
-          <div className="flex items-center gap-2 sm:gap-4">
-            <button onClick={toggleTheme} className="p-2 hover:bg-[var(--
+          <div className="flex items-center gap-4">
+            <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+              {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+            </button>
+            <button 
+              onClick={handleCheckoutNavigation}
+              className="bg-indigo-600 text-white px-5 py-2 rounded-full font-bold text-sm hover:bg-indigo-700 transition-all"
+            >
+              {t('get_access')}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        {/* Hero Section */}
+        <section className="py-20 text-center px-4">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <h1 className="text-5xl md:text-7xl font-black mb-6">
+              {t('hero_title', { count: 12000 })}
+            </h1>
+            <p className="text-xl text-[var(--text-muted)] mb-10 max-w-2xl mx-auto">
+              {t('hero_subtitle')}
+            </p>
+            <button 
+              onClick={handleCheckoutNavigation}
+              className="bg-indigo-600 text-white px-10 py-4 rounded-2xl text-xl font-bold hover:scale-105 transition-transform flex items-center gap-2 mx-auto"
+            >
+              <Download className="w-6 h-6" />
+              {t('download_now')}
+            </button>
+          </motion.div>
+        </section>
+
+        {/* Pricing Card */}
+        <section className="py-20 bg-[var(--bg-card)]">
+          <div className="max-w-md mx-auto px-4">
+            <div className="bg-[var(--bg-main)] rounded-[2.5rem] p-8 border-2 border-indigo-600 shadow-2xl relative">
+              {settings.is_discount_active === 'true' && (
+                <div className="absolute -top-4 right-4 bg-red-500 text-white px-4 py-1 rounded-full text-sm font-bold">
+                  -{discountPercent}% OFF
+                </div>
+              )}
+              <h3 className="text-2xl font-bold mb-4 text-center">{t('limited_offer')}</h3>
+              <div className="flex justify-center items-center gap-3 mb-8">
+                <span className="text-3xl text-gray-400 line-through">${settings.original_price}</span>
+                <span className="text-6xl font-black text-indigo-600">${settings.sale_price}</span>
+              </div>
+              <button 
+                onClick={handleCheckoutNavigation}
+                className="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold text-xl hover:bg-indigo-700 shadow-lg"
+              >
+                {t('get_access')}
+              </button>
+              <div className="mt-6 space-y-3">
+                <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+                  <Lock className="w-4 h-4" /> {t('secure_checkout')}
+                </div>
+                <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+                  <CreditCard className="w-4 h-4" /> {t('stripe_paypal')}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="py-20 max-w-3xl mx-auto px-4">
+          <h2 className="text-3xl font-bold mb-10 text-center">{t('faq')}</h2>
+          <FAQItem question={t('faq_q1')} answer={t('faq_a1')} />
+          <FAQItem question={t('faq_q2')} answer={t('faq_a2')} />
+        </section>
+      </main>
+
+      <footer className="py-10 text-center border-t border-[var(--border-color)]">
+        <Logo />
+        <p className="mt-4 text-sm text-[var(--text-muted)]">
+          © {new Date().getFullYear()} PLRYO. {t('rights_reserved')}
+        </p>
+      </footer>
+    </div>
+  );
+}
