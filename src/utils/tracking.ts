@@ -1,13 +1,25 @@
 // src/utils/tracking.ts
-export const trackEvent = (category: string, action: string, label?: string) => {
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    (window as any).gtag('event', action, {
-      event_category: category,
-      event_label: label,
-    });
-  }
+
+// دالة عامة لتتبع الأحداث
+export const trackEvent = (category?: any, action?: any, label?: any) => {
+  console.log("Track Event:", { category, action, label });
 };
 
-export const initGA = (id: string) => {
-  // كود تهيئة جوجل أناليتكس إذا كنت تستخدمه
+// دالة لتتبع زيارات الصفحات
+export const trackPageView = (url?: string) => {
+  console.log("Track Page View:", url);
 };
+
+// دالة التهيئة
+export const initTracking = () => {
+  console.log("Tracking System Ready");
+};
+
+// تصدير افتراضي لتجنب أخطاء الاستيراد غير المسمى
+const tracking = {
+  trackEvent,
+  trackPageView,
+  initTracking
+};
+
+export default tracking;
